@@ -54,7 +54,7 @@ export default function NewChart(props: { id: string; choose: (para: string) => 
 
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <ResponsiveContainer width="80%" height={400}>
+      <ResponsiveContainer width={800} height={400}>
         <LineChart
           data={points}
           margin={{
