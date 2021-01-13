@@ -1,17 +1,18 @@
 import {
   Container,
-  IconButton,
   List,
   ListItem,
-  ListItemText,
   Collapse,
   Typography,
   Card,
-  Button
+  Button,
+  DialogActions,
+  Dialog,
+  DialogContent
 } from "@material-ui/core";
 import { GetProjectData_project_exports, GetProjectData_project_videos } from "../__generated__/GetProjectData";
 import { GetTestjobs_testjobs } from "./__generated__/GetTestjobs";
-import { ExpandLess, ExpandMore } from "@material-ui/icons";
+import RenameExportButton from "./RenameExportButton";
 import { gql, useQuery } from "@apollo/client";
 import React, { ReactElement } from "react";
 import StreamViewer from "./StreamViewer";
@@ -43,7 +44,7 @@ export default function Results(props: {
 
   return (
     <Container>
-      <Typography>Exported Models</Typography>
+      {props.exports.length > 0 && <Typography>Exported Models</Typography>}
       <List>
         {props.exports.map((exprt) => (
           <Card key={exprt.name} variant="outlined">
@@ -60,50 +61,55 @@ function ExportInfo(props: {
   videos: GetProjectData_project_videos[];
   jobs: GetTestjobs_testjobs[];
 }): JSX.Element {
-  const [open, setOpen] = React.useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(!open);
-  };
-
   const job = props.jobs.find((job) => job.exportID === props.exprt.id);
   const active = job !== undefined;
   const port = job ? job.streamPort : "0000";
 
   return (
     <>
-      <ListItem button onClick={handleClickOpen}>
-        <ListItemText primary={props.exprt.name} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
+      <ListItem>
+        <Typography variant="h6" style={{ flexGrow: 1 }}>
+          {props.exprt.name}
+        </Typography>
         <ActiveTestView active={active} port={port} />
         <TestButton active={active} modelExport={props.exprt} videos={props.videos} />
         <a download href={`http://localhost:4000/${props.exprt.downloadPath}`}>
-          <IconButton>Download</IconButton>
+          <Button variant="outlined">Download</Button>
         </a>
-      </Collapse>
+        <RenameExportButton id={props.exprt.id} />
+      </ListItem>
     </>
   );
 }
 
 function ActiveTestView(props: { active: boolean; port: string }): JSX.Element {
-  const [streaming, setStreaming] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const handleClickView = () => {
-    setStreaming(!streaming);
+    setOpen(true);
   };
-
-  const buttonColor = streaming ? "primary" : "secondary";
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <>
       <Collapse in={props.active} timeout="auto" unmountOnExit>
-        <Button variant="outlined" color={buttonColor} onClick={handleClickView}>
-          {streaming ? "Close" : "View"}
+        <Button variant="outlined" color="secondary" onClick={handleClickView}>
+          View
         </Button>
-        <Collapse in={streaming} timeout="auto" unmountOnExit>
-          <StreamViewer port={props.port} />
-        </Collapse>
+        <Dialog onClose={handleClose} open={open} style={{ display: "block" }} maxWidth={false}>
+          <DialogContent dividers>
+            <StreamViewer port={props.port} />
+          </DialogContent>
+          <DialogActions>
+            <Button autoFocus onClick={handleClose}>
+              Close
+            </Button>
+            <Button autoFocus color="primary">
+              Stop
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Collapse>
     </>
   );
