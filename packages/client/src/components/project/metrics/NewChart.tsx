@@ -76,7 +76,6 @@ export default function NewChart(props: { id: string; choose: (para: string) => 
             stroke="#8884d8"
             activeDot={{ r: 8, onClick: (event: PointEvent) => handleClick(parseInt(event.payload.name)) }}
             // dot={renderDot}
-
           />
         </LineChart>
       </ResponsiveContainer>
@@ -86,7 +85,7 @@ export default function NewChart(props: { id: string; choose: (para: string) => 
   // function renderDot(props: {cx: number, cy: number, stroke: unknown, payload: {name:number}, value: unknown}): ReactElement {
   //   console.log(props.payload.name);
   //   if (props.payload.name !== 3) return <></>;
-    
+
   //   return (
   //     <svg x={props.cx} y={props.cy} width={200} height={200} fill="red" viewBox="0 0 1024 1024">
   //     <path d="M150 0 L75 200 L225 200 Z" />
