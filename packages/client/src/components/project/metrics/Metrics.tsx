@@ -16,7 +16,6 @@ import {
   TableHead
 } from "@material-ui/core";
 import React, { ReactElement } from "react";
-import Chart from "./Chart";
 import ExportButton from "./ExportButton";
 import * as path from "path";
 import { GetProjectData_project_checkpoints } from "../__generated__/GetProjectData";
@@ -26,6 +25,7 @@ import { GetExportjobs_exportjobs } from "./__generated__/GetExportjobs";
 import { CircularProgress } from "@material-ui/core";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import NewExportButton from "./NewExportButton";
+import NewChart from "./NewChart";
 
 const GET_EXPORTJOBS = gql`
   query GetExportjobs {
@@ -45,8 +45,8 @@ export default function Metrics(props: {
 }): ReactElement {
   const [selectedCheckpoint, setSelectedCheckpoint] = React.useState<GetProjectData_project_checkpoints>();
 
-  function onSet(stepNumber: number): void {
-    const checkpoint = props.checkpoints.find((checkpoint) => checkpoint.step === stepNumber);
+  function onSet(id: string): void {
+    const checkpoint = props.checkpoints.find((checkpoint) => checkpoint.id === id);
     setSelectedCheckpoint(checkpoint);
   }
 
@@ -61,7 +61,7 @@ export default function Metrics(props: {
     <>
       <Grid container spacing={3}>
         <Grid item xs={9}>
-          <Chart checkpoints={props.checkpoints} onClick={onSet} />
+          <NewChart id={props.id} choose={onSet} />
           <NewExportButton id={props.id} />
         </Grid>
         <Grid item xs={3}>
