@@ -25,6 +25,7 @@ import { gql, useQuery } from "@apollo/client";
 import { GetExportjobs_exportjobs } from "./__generated__/GetExportjobs";
 import { CircularProgress } from "@material-ui/core";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import NewExportButton from "./NewExportButton";
 
 const GET_EXPORTJOBS = gql`
   query GetExportjobs {
@@ -61,6 +62,7 @@ export default function Metrics(props: {
       <Grid container spacing={3}>
         <Grid item xs={9}>
           <Chart checkpoints={props.checkpoints} onClick={onSet} />
+          <NewExportButton />
         </Grid>
         <Grid item xs={3}>
           <CheckpointInfo
@@ -72,9 +74,6 @@ export default function Metrics(props: {
           <Exportjobs jobs={data.exportjobs} id={props.id} />
         </Grid>
       </Grid>
-      {/*<Collapse in={selectedCheckpoint !== undefined} timeout="auto" unmountOnExit>*/}
-      {/*  <CheckpointInfo checkpoint={selectedCheckpoint} exports={props.exports} jobs={data.exportjobs} id={props.id} />*/}
-      {/*</Collapse>*/}
     </>
   );
 }
