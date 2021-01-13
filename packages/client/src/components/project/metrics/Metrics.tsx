@@ -62,7 +62,7 @@ export default function Metrics(props: {
       <Grid container spacing={3}>
         <Grid item xs={9}>
           <Chart checkpoints={props.checkpoints} onClick={onSet} />
-          <NewExportButton />
+          <NewExportButton id={props.id} />
         </Grid>
         <Grid item xs={3}>
           <CheckpointInfo
