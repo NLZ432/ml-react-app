@@ -31,12 +31,12 @@ export default function Input(props: { id: string; datasets: GetProjectData_proj
 
   if (trainjob === undefined)
     return (
-      <>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <Box display="inline-flex">
           <Parameters id={props.id} datasets={props.datasets} />
           <StartButton id={props.id} />
         </Box>
-      </>
+      </div>
     );
 
   let statusMessage;
