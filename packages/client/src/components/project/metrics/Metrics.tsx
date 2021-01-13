@@ -1,31 +1,18 @@
-import {
-  Typography,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Card,
-  Grid,
-  TableContainer,
-  Paper,
-  Table,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableHead
-} from "@material-ui/core";
-import React, { ReactElement } from "react";
-import ExportButton from "./ExportButton";
-import * as path from "path";
-import { GetProjectData_project_checkpoints } from "../__generated__/GetProjectData";
-import { GetProjectData_project_exports } from "../__generated__/GetProjectData";
-import { gql, useQuery } from "@apollo/client";
+import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { GetExportjobs_exportjobs } from "./__generated__/GetExportjobs";
 import { CircularProgress } from "@material-ui/core";
-import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
-import NewExportButton from "./NewExportButton";
+import { gql, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
+import React, { ReactElement } from "react";
 import NewChart from "./NewChart";
+
+const EXPORT_CHECKPOINT_BUTTON_MUTATION = gql`
+  mutation exportCheckpoint($id: ID!, $checkpointID: String!, $name: String!) {
+    exportCheckpoint(id: $id, checkpointID: $checkpointID, name: $name) {
+      id
+    }
+  }
+`;
 
 const GET_EXPORTJOBS = gql`
   query GetExportjobs {
@@ -38,18 +25,8 @@ const GET_EXPORTJOBS = gql`
   }
 `;
 
-export default function Metrics(props: {
-  id: string;
-  checkpoints: GetProjectData_project_checkpoints[];
-  exports: GetProjectData_project_exports[];
-}): ReactElement {
-  const [selectedCheckpoint, setSelectedCheckpoint] = React.useState<GetProjectData_project_checkpoints>();
-
-  function onSet(id: string): void {
-    const checkpoint = props.checkpoints.find((checkpoint) => checkpoint.id === id);
-    setSelectedCheckpoint(checkpoint);
-  }
-
+export default function Metrics(props: { id: string }): ReactElement {
+  const [exportCheckpoint] = useMutation(EXPORT_CHECKPOINT_BUTTON_MUTATION);
   const { data, loading, error } = useQuery(GET_EXPORTJOBS, {
     pollInterval: 2000
   });
@@ -57,116 +34,24 @@ export default function Metrics(props: {
   if (error) return <p>{error.message}</p>;
   if (data === undefined) return <p>NO DATA</p>;
 
-  return (
-    <>
-      <Grid container spacing={3}>
-        <Grid item xs={9}>
-          <NewChart id={props.id} choose={onSet} />
-          <NewExportButton id={props.id} />
-        </Grid>
-        <Grid item xs={3}>
-          <CheckpointInfo
-            checkpoint={selectedCheckpoint}
-            exports={props.exports}
-            jobs={data.exportjobs}
-            id={props.id}
-          />
-          <Exportjobs jobs={data.exportjobs} id={props.id} />
-        </Grid>
-      </Grid>
-    </>
-  );
-}
-
-function CheckpointInfo(props: {
-  checkpoint: GetProjectData_project_checkpoints | undefined;
-  exports: GetProjectData_project_exports[] | undefined;
-  jobs: GetExportjobs_exportjobs[];
-  id: string;
-}): JSX.Element {
-  if (props.checkpoint) {
-    const job = props.jobs.find((job) => job.projectID === props.id && job.checkpointID === props.checkpoint?.id);
-    return (
-      <Card variant="outlined">
-        <Grid spacing={5} container direction="row" justify="center" alignItems="center">
-          <Grid item container xs={12} justify="center">
-            <Typography>{`Epoch ${props.checkpoint.step}`}</Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <MetricsList checkpoint={props.checkpoint} />
-          </Grid>
-          <Grid item xs={6}>
-            <ExportsList checkpoint={props.checkpoint} exports={props.exports} />
-          </Grid>
-          <Grid item container xs={12} justify="center" alignItems="center">
-            <ExportButton id={props.id} checkpoint={props.checkpoint} job={job} />
-          </Grid>
-        </Grid>
-      </Card>
-    );
+  function onSet(checkpointID: string): void {
+    const name = "EXPORT";
+    const id = props.id;
+    exportCheckpoint({ variables: { id, checkpointID, name } }).catch((err) => {
+      console.log(err);
+    });
   }
-  return <></>;
-}
-
-function MetricsList(props: { checkpoint: GetProjectData_project_checkpoints }): JSX.Element {
-  const metrics: { name: string; value: number }[] = [];
-
-  if (props.checkpoint.precision) metrics.push({ name: "precision", value: props.checkpoint.precision });
-
-  return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Metric</TableCell>
-            <TableCell align="right">Value</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {metrics.map((metric) => (
-            <TableRow key={metric.name}>
-              <TableCell component="th" scope="row">
-                {metric.name}
-              </TableCell>
-              <TableCell align="right">{metric.value}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-}
-
-function ExportsList(props: {
-  checkpoint: GetProjectData_project_checkpoints | undefined;
-  exports: GetProjectData_project_exports[] | undefined;
-}): JSX.Element {
-  const ckptExports = props.exports ? props.exports.filter((exprt) => exprt.checkpointID === props.checkpoint?.id) : [];
 
   return (
     <>
-      <Typography variant="body1">Exported Models:</Typography>
-      <List dense={true}>
-        {ckptExports.map((exprt) => (
-          <ListItem key={exprt.id}>
-            <ListItemIcon>
-              <IconButton>
-                <a download href={`http://localhost:4000/${exprt.downloadPath}`}>
-                  <CloudDownloadIcon />
-                </a>
-              </IconButton>
-            </ListItemIcon>
-            <ListItemText primary={path.basename(exprt.downloadPath)} />
-          </ListItem>
-        ))}
-      </List>
+      <NewChart id={props.id} choose={onSet} />
+      <Exportjobs jobs={data.exportjobs} id={props.id} />
     </>
   );
 }
 
 function Exportjobs(props: { jobs: GetExportjobs_exportjobs[]; id: string }): JSX.Element {
   const projectJobs = props.jobs.filter((job) => job.projectID === props.id);
-
   return (
     <>
       <List dense={true}>

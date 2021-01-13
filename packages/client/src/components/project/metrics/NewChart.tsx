@@ -53,29 +53,31 @@ export default function NewChart(props: { id: string; choose: (para: string) => 
   }
 
   return (
-    <ResponsiveContainer width={800} height={400}>
-      <LineChart
-        data={points}
-        margin={{
-          top: 5,
-          right: 10,
-          left: 10,
-          bottom: 5
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <ResponsiveContainer width="80%" height={400}>
+        <LineChart
+          data={points}
+          margin={{
+            top: 5,
+            right: 10,
+            left: 10,
+            bottom: 5
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
 
-        <Line
-          type="monotone"
-          dataKey="precision"
-          stroke="#8884d8"
-          activeDot={{ r: 8, onClick: (event: PointEvent) => handleClick(parseInt(event.payload.name)) }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+          <Line
+            type="monotone"
+            dataKey="precision"
+            stroke="#8884d8"
+            activeDot={{ r: 8, onClick: (event: PointEvent) => handleClick(parseInt(event.payload.name)) }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

@@ -86,8 +86,8 @@ export default function Project(props: { id: string }): ReactElement {
           <Grid item xs={12}>
             <Input id={props.id} datasets={data.project.datasets} />
           </Grid>
-          <Grid item xs={9}>
-            <Metrics id={props.id} checkpoints={data.project.checkpoints} exports={data.project.exports} />
+          <Grid item xs={12}>
+            <Metrics id={props.id} />
           </Grid>
           <Grid item xs={12}>
             <Results id={props.id} exports={data.project.exports} videos={data.project.videos} />
